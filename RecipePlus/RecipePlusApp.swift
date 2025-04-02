@@ -6,12 +6,20 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct RecipePlusApp: App {
+    var sharedModelContainer: ModelContainer = {
+        let schema = Schema([RecipesViewModel.self, SectionsViewModel.self])
+        let container = try! ModelContainer(for: schema)
+        return container
+    }()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .modelContainer(sharedModelContainer)
         }
     }
 }
