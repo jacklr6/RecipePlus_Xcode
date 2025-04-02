@@ -9,6 +9,10 @@ import SwiftUI
 import SwiftData
 
 struct CookingMain: View {
+    @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.verticalSizeClass) var verticalSizeClass
+    
     @State private var currentStepIndex = 0
     @State private var isPlaying = false
     @State private var timerProgress: Double = 0
@@ -21,41 +25,42 @@ struct CookingMain: View {
                     .font(.title2)
                     .foregroundColor(.gray)
             } else {
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 20) {
-                            ForEach(steps.indices, id: \.self) { index in
+                ScrollView(.horizontal) {
+                    HStack {
+                        ForEach(steps.indices, id: \.self) { index in
+                            ZStack {
                                 Text(steps[index])
                                     .font(.title3)
-                                    .foregroundColor(index == currentStepIndex ? .blue : .primary)
                                     .padding()
-                                    .background(index == currentStepIndex ? Color.blue.opacity(0.1) : Color.clear)
+                                    .foregroundColor(index == currentStepIndex ? .blue : .primary)
                                     .cornerRadius(8)
                                     .id(index)
+                                    .frame(width: 300)
+                                    .multilineTextAlignment(.center)
+                                
+                                RoundedRectangle(cornerRadius: 10)
+                                    .frame(width: 300, height: 250)
+                                    .foregroundColor(index == currentStepIndex ? Color.blue.opacity(0.1) : Color.clear)
+                            }
+                            .containerRelativeFrame(.horizontal, count: verticalSizeClass == .regular ? 1 : 2, spacing: 1)
+                            .scrollTransition { content, phase in
+                                content
+                                    .opacity(phase.isIdentity ? 1 : 0.15)
+                                    .scaleEffect(phase.isIdentity ? 1 : 0.3)
                             }
                         }
                     }
-                    .onChange(of: currentStepIndex) { _, targetIndex in
-                        withAnimation { proxy.scrollTo(targetIndex, anchor: .center) }
-                    }
+                    .scrollTargetLayout()
                 }
-            }
-
-            HStack {
-                Button(action: togglePlayback) {
-                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                        .font(.largeTitle)
-                }
-                .padding()
-
-                ProgressView(value: timerProgress)
-                    .frame(width: 200)
+                .contentMargins(16, for: .scrollContent)
+                .scrollTargetBehavior(.viewAligned)
             }
         }
-        .padding()
     }
+}
 
-    func togglePlayback() {
-        isPlaying.toggle()
+struct CookingMain_Previews: PreviewProvider {
+    static var previews: some View {
+        CookingMain(steps: ["The first step is to add all of your ingredients to a large mixing bowl", "After, add the oil and mix well", "Next, add the salt and pepper to taste"])
     }
 }
