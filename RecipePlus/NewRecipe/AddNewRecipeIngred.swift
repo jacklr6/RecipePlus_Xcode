@@ -129,6 +129,7 @@ struct AddNewRecipeIngred: View {
                                         .scaledToFit()
                                         .frame(maxWidth: 150, maxHeight: 100)
                                         .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    
                                 } else {
                                     Rectangle()
                                         .fill(Color.gray.opacity(0.3))
