@@ -26,7 +26,11 @@ struct CookingMain: View {
     @State private var lastInteractionDate = Date()
     @State private var selectedPhotoItem: PhotosPickerItem? = nil
     @State private var selectedImage: UIImage? = nil
+    @State private var noImageFound: Bool = false
+    @AppStorage("primaryColor") private var primaryColor: Int = 4
+    @AppStorage("secondaryColor") private var secondaryColor: Int = 5
     @AppStorage("TimeIntervalSave") var timeIntervalSave: TimeInterval = 10
+    @AppStorage("isLightMode") private var isLightMode: Bool = true
 
     var body: some View {
         VStack {
@@ -38,27 +42,44 @@ struct CookingMain: View {
                 ZStack {
                     VStack {
                         if let image = selectedImage ?? (recipe.imageData != nil ? UIImage(data: recipe.imageData!) : nil) {
-                            ZStack {
+                            ZStack(alignment: .bottom) {
                                 Image(uiImage: image)
                                     .resizable()
-                                    .scaledToFit()
+                                    .scaledToFill()
+                                    .frame(height: 320)
+                                    .clipped()
+                                
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.clear, Color.white]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                                .frame(height: 320)
+                            }
+                            .overlay(
+                                Text(recipe.name)
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                    .padding(.bottom, 20),
+                                alignment: .bottom
+                            )
+                        } else {
+                            ZStack {
+                                Rectangle()
+                                    .fill(LinearGradient(gradient: Gradient(colors: [colorFromTag(primaryColor), colorFromTag(secondaryColor)]), startPoint: .topTrailing, endPoint: .bottomLeading))
                                     .frame(height: 320)
                                     .overlay(
                                         LinearGradient(gradient: Gradient(colors: [Color.clear, Color.white]), startPoint: .top, endPoint: .bottom)
                                     )
-                                Text(recipe.name)
-                                    .font(.title)
-                                    .fontWeight(.bold)
-                                    .offset(y: 130)
-                            }
-                        } else {
-                            ZStack {
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.3))
-                                    .frame(height: 320)
-                                    .overlay(
-                                        LinearGradient(gradient: Gradient(colors: [Color.gray, Color.white]), startPoint: .top, endPoint: .bottom)
-                                    )
+                                
+                                Image(systemName: "photo.badge.exclamationmark")
+                                    .symbolEffect(.bounce, options: .nonRepeating)
+                                    .font(.system(size: 70))
+                                    .offset(y: 10)
+                                    .onTapGesture {
+                                        noImageFound = true
+                                    }
+                                
                                 Text(recipe.name)
                                     .font(.title)
                                     .fontWeight(.bold)
@@ -121,6 +142,11 @@ struct CookingMain: View {
                             }
                     }
                 }
+                .alert("No Image Found", isPresented: $noImageFound) {
+                    Button("Cool!", role: .cancel) { noImageFound = false }
+                } message: {
+                    Text("To add an image, edit the recipe from the main page.")
+                }
             }
         }
     }
@@ -142,6 +168,18 @@ struct CookingMain: View {
                     showHintArrow = true
                 }
             }
+        }
+    }
+    
+    func colorFromTag(_ tag: Int) -> Color {
+        switch tag {
+            case 1: return .red
+            case 2: return .orange
+            case 3: return .yellow
+            case 4: return .green
+            case 5: return .blue
+            case 6: return .purple
+            default: return .gray
         }
     }
 }

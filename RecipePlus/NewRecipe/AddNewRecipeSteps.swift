@@ -139,35 +139,35 @@ struct AddNewRecipeSteps: View {
         if steps.contains(where: { $0.text.isEmpty }) {
             showRequiredQuestionsAlert = true
         } else {
-            saveRecipe()
+            saveSteps()
         }
     }
 
-    private func saveRecipe() {
-        recipe.name = recipe.name
-        recipe.sectionName = recipe.sectionName
-        recipe.ingredients = recipe.ingredients
-        recipe.imageData = recipe.imageData
-        recipe.saveDate = Date()
-        recipe.steps = steps
-        
+    private func saveSteps() {
+        for step in steps {
+            if !recipe.steps.contains(where: { $0.id == step.id }) {
+                modelContext.insert(step)
+                recipe.steps.append(step)
+            }
+        }
+
         do {
             try modelContext.save()
         } catch {
-            print("Error saving recipe: \(error)")
+            print("Error saving updated steps: \(error)")
         }
-        
+
         recipeConfimedSaveVisibility = 1.0
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             recipeConfirmedSaveIcon = true
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
             recipeConfimedSaveVisibility = 0.0
             recipeConfirmedSaveIcon = false
         }
-        
+
         dismiss()
     }
 }

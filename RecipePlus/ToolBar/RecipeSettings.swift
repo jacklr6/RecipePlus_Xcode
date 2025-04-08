@@ -15,6 +15,7 @@ struct RecipeSettings: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @State private var settingsEditorIsPresented: Bool = false
+    @State private var deleteConfirmation: Bool = false
     @State private var isDeleting: Bool = false
     @State private var dataIsDeleted: Bool = false
     @AppStorage("primaryColor") private var primaryColor: Int = 4
@@ -90,19 +91,21 @@ struct RecipeSettings: View {
                             }
                         }
                         
-                        Section(header: Text("Image Compression \(Image(systemName: "photo.on.rectangle.angled.fill"))  |  \(String(format: "%.1f", imageCompressionQuality))"),
+                        Section(header: Text("Image Compression \(Image(systemName: "photo.on.rectangle.angled"))  |  \(String(format: "%.1f", imageCompressionQuality))"),
                                 footer: Text("Change the quality of images when they are saved to your Recipe+ list.")) {
                             Slider(value: $imageCompressionQuality, in: 0.0...1.0, step: 0.1) {
                             } minimumValueLabel: {
                                 Text("Low ")
+                                    .foregroundColor(imageCompressionQuality == 0.0 ? .blue : .black)
                             } maximumValueLabel: {
                                 Text(" High")
+                                    .foregroundColor(imageCompressionQuality == 1.0 ? .blue : .black)
                             } onEditingChanged: { editing in
                                 isEditing = editing
                             }
                         }
                         
-                        Section(header: Text("App Color \(Image(systemName: "paintbrush"))"), footer: Text("Changes the colors of certain icons in the app.")) {
+                        Section(header: Text("App Color \(Image(systemName: "paintbrush"))").foregroundStyle(LinearGradient(gradient: Gradient(colors: [colorFromTag(primaryColor), colorFromTag(secondaryColor)]), startPoint: .topLeading, endPoint: .bottomTrailing)), footer: Text("Changes the colors of certain icons in the app.")) {
                             HStack {
                                 Picker("Primary Color", selection: $primaryColor) {
                                     Text("Red").tag(1)
@@ -137,12 +140,16 @@ struct RecipeSettings: View {
                                 Text("Time Interval:")
                                 Spacer()
                                 TextField("10", text: $timeIntervalSave)
+                                    .multilineTextAlignment(.trailing)
+                                    .foregroundColor(.blue)
+                                Text("Seconds")
+                                    .foregroundColor(.blue)
                             }
                         }
                         
                         Section(header: Text("Your Data")) {
                             Button(action: {
-                                deleteAllRecipes()
+                                deleteConfirmation = true
                             }) {
                                 HStack {
                                     Text("Delete All Recipe+ Data")
@@ -155,7 +162,7 @@ struct RecipeSettings: View {
                         }
                         
                         VStack {
-                            Text("Recipe + | iOS Build \(Text("2.0.3 Beta").fontWeight(.bold).foregroundStyle(LinearGradient(gradient: Gradient(colors: [colorFromTag(primaryColor), colorFromTag(secondaryColor)]), startPoint: .topLeading, endPoint: .bottomTrailing)))")
+                            Text("Recipe + | iOS Build \(Text("2.0.4 Beta").fontWeight(.bold).foregroundStyle(LinearGradient(gradient: Gradient(colors: [colorFromTag(primaryColor), colorFromTag(secondaryColor)]), startPoint: .topLeading, endPoint: .bottomTrailing)))")
                             Text("Jack Rogers | 2025")
                         }
                         .font(.footnote)
@@ -170,13 +177,19 @@ struct RecipeSettings: View {
                             Image(systemName: "chevron.left")
                                 .foregroundColor(.blue)
                                 .fontWeight(.semibold)
-                            Text("Recipe +")
+                            Text("Recipe+")
                         }
                     })
+                    .alert("Confirmation", isPresented: $deleteConfirmation) {
+                        Button("Delete", role: .destructive) { deleteAllRecipes() }
+                        Button("Cancel", role: .cancel) { dismiss() }
+                    } message: {
+                        Text("Are you sure you want to remove all of your Recipe+ data?\nThis action cannot be undone.")
+                    }
                     .alert("Your Data Has Been Deleted", isPresented: $dataIsDeleted) {
                         Button("Cool!", role: .cancel) { dismiss() }
                     } message: {
-                        Text("All of your data has been removed. Welcome to Recipe +.")
+                        Text("All of your data has been removed. Welcome to Recipe+.")
                     }
                 }
             }
@@ -231,6 +244,7 @@ struct RecipeSettings: View {
             recipes.removeAll()
             ingredients.removeAll()
             steps.removeAll()
+            deleteConfirmation = false
             isDeleting = false
             dataIsDeleted = true
         }

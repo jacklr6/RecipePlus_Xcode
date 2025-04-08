@@ -64,15 +64,22 @@ struct RecipeSearch: View {
                                                     Image(uiImage: uiImage)
                                                         .resizable()
                                                         .scaledToFill()
-                                                        .frame(width: 80, height: 80)
+                                                        .frame(width: 100, height: 100)
                                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                                         .padding(.trailing, 8)
                                                 } else {
                                                     Rectangle()
                                                         .fill(Color.gray.opacity(0.3))
-                                                        .frame(width: 80, height: 80)
-                                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                        .padding(.trailing, 8)
+                                                        .frame(width: 100, height: 100)
+                                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                        .overlay(
+                                                            Image(systemName: "photo.badge.exclamationmark")
+                                                                .foregroundStyle(
+                                                                    LinearGradient(gradient: Gradient(colors: [colorFromTag(primaryColor), colorFromTag(secondaryColor)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                                                                )
+                                                                .font(.system(size: 40))
+                                                                .fontWeight(.semibold)
+                                                        )
                                                 }
                                                 
                                                 VStack(alignment: .leading) {
@@ -84,7 +91,6 @@ struct RecipeSearch: View {
                                                             Text("\(ingredient.difficulty)")
                                                         }
                                                         .padding(.trailing, 2)
-                                                        .padding(.leading, -2)
                                                         Text("•")
                                                             .padding(.trailing, 2)
                                                         ForEach(recipe.ingredients, id: \.name) { ingredient in
@@ -105,20 +111,20 @@ struct RecipeSearch: View {
                                                 Spacer()
                                                 
                                                 VStack {
-//                                                    Button(action: {
-//                                                        selectedRecipeCooking = recipe
-//                                                        isCooking = true
-//                                                    }) {
-//                                                        Image(systemName: "fork.knife")
-//                                                    }
-//                                                    .buttonStyle(PlainButtonStyle())
-//                                                    .navigationDestination(isPresented: $isCooking) {
-//                                                        if let recipeToCook = selectedRecipeCooking {
-//                                                            CookingMain(recipe: recipeToCook)
-//                                                        }
-//                                                    }
-//                                                    Spacer()
-                                                    
+                                                    Button(action: {
+                                                        selectedRecipeCooking = recipe
+                                                        isCooking = true
+                                                    }) {
+                                                        Image(systemName: "fork.knife")
+                                                    }
+                                                    .buttonStyle(PlainButtonStyle())
+                                                    .navigationDestination(isPresented: $isCooking) {
+                                                        if let recipeToCook = selectedRecipeCooking {
+                                                            CookingMain(recipe: recipeToCook)
+                                                        }
+                                                    }
+                                                    Spacer()
+
                                                     Button(action: {
                                                         selectedRecipeEdit = recipe
                                                         isEditing = true
@@ -132,7 +138,7 @@ struct RecipeSearch: View {
                                                         }
                                                     }
                                                     Spacer()
-                                                    
+
                                                     Button(action: {
                                                         recipe.isFavorite.toggle()
                                                     }) {
@@ -153,11 +159,11 @@ struct RecipeSearch: View {
                                     }
                                 }
                             }
-                            .alert("Start Cooking", isPresented: $isCooking) {
-                                Button("Cancel", role: .cancel) { }
-                            } message: {
-                                Text("CookingUI is coming soon...")
-                            }
+//                            .alert("Start Cooking", isPresented: $isCooking) {
+//                                Button("Cancel", role: .cancel) { }
+//                            } message: {
+//                                Text("CookingUI is coming soon...")
+//                            }
                         }
                     }
                     .navigationTitle("Search")

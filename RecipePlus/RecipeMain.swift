@@ -118,19 +118,15 @@ struct RecipeMain: View {
                                                         Text(recipe.name)
                                                             .font(.headline)
                                                         Spacer()
+                                                        
                                                         HStack(spacing: 0) {
                                                             ForEach(recipe.ingredients, id: \.name) { ingredient in
-                                                                Text("\(ingredient.difficulty)")
-                                                            }
-                                                            .padding(.trailing, 2)
-                                                            Text("•")
-                                                                .padding(.trailing, 2)
-                                                            ForEach(recipe.ingredients, id: \.name) { ingredient in
-                                                                Text("\(ingredient.timeAmount) \(ingredient.unitTime)")
+                                                                Text("\(ingredient.difficulty) • \(ingredient.timeAmount) \(ingredient.unitTime)")
                                                             }
                                                         }
                                                         .font(.subheadline)
                                                         .foregroundColor(Color.gray)
+                                                        .multilineTextAlignment(.leading)
                                                         
                                                         Text(recipe.saveDate.formatted(date: .abbreviated, time: .shortened))
                                                             .font(.subheadline)

@@ -126,7 +126,7 @@ struct AddNewRecipeIngred: View {
                                 if let image = selectedImage {
                                     Image(uiImage: image)
                                         .resizable()
-                                        .scaledToFit()
+                                        .scaledToFill()
                                         .frame(maxWidth: 150, maxHeight: 100)
                                         .clipShape(RoundedRectangle(cornerRadius: 10))
                                     
@@ -190,18 +190,45 @@ struct AddNewRecipeIngred: View {
                                 
                                 let imageData = selectedImage?.jpegData(compressionQuality: imageCompressionQuality)
                                 
+                                let savedIngredients = ingredients.map { ingred in
+                                    let newIngred = IngredViewModel(
+                                        name: ingred.name,
+                                        timeAmount: ingred.timeAmount,
+                                        unitTime: ingred.unitTime,
+                                        difficulty: ingred.difficulty,
+                                        quantity: ingred.quantity,
+                                        unit: ingred.unit
+                                    )
+                                    modelContext.insert(newIngred)
+                                    return newIngred
+                                }
+
+                                let savedSteps = steps.map { step in
+                                    let newStep = StepsViewModel(text: step.text)
+                                    modelContext.insert(newStep)
+                                    return newStep
+                                }
+                                
                                 let newRecipe = RecipesViewModel(
                                     name: recipeName,
                                     sectionName: sectionName,
-                                    ingredients: ingredients,
-                                    steps: steps,
+                                    ingredients: savedIngredients,
+                                    steps: savedSteps,
                                     imageData: imageData,
                                     saveDate: recipeCreateDate
                                 )
                                 
                                 modelContext.insert(newRecipe)
                                 
+                                do {
+                                    try modelContext.save()
+                                } catch {
+                                    print("Error saving new recipe: \(error)")
+                                }
+                                
                                 selectedRecipe = newRecipe
+                                
+                                navigateToSteps = true
                                 
                                 requiredQuestionsFilled()
                             }) {
