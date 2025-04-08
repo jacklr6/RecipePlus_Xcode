@@ -246,7 +246,7 @@ struct EditRecipe: View {
                     }
                 }
                 .alert("Privacy Information", isPresented: $showImageAlert) {
-                    Button("OK", role: .cancel) { }
+                    Button("OK", role: .cancel) { dismiss() }
                 } message: {
                     Text("All photos are stored on-device and never leave your iPhone. Not only your photos, but all of your Recipes+ data can be erased in settings.")
                 }

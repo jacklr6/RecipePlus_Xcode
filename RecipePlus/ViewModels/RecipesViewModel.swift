@@ -13,8 +13,8 @@ class RecipesViewModel {
     var name: String
     var isFavorite: Bool
     var sectionName: String
-    var ingredients: [IngredViewModel]
-    var steps: [StepsViewModel]
+    @Relationship(deleteRule: .cascade) var ingredients: [IngredViewModel]
+    @Relationship(deleteRule: .cascade) var steps: [StepsViewModel]
     var imageData: Data?
     var saveDate: Date
     

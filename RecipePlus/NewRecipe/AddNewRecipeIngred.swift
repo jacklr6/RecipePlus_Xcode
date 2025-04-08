@@ -226,9 +226,15 @@ struct AddNewRecipeIngred: View {
                                     print("Error saving new recipe: \(error)")
                                 }
                                 
-                                selectedRecipe = newRecipe
-                                
-                                navigateToSteps = true
+                                let descriptor = FetchDescriptor<RecipesViewModel>(
+                                    predicate: #Predicate { $0.name == recipeName },
+                                    sortBy: [.init(\.saveDate, order: .reverse)]
+                                )
+
+                                if let savedRecipe = try? modelContext.fetch(descriptor).first {
+                                    selectedRecipe = savedRecipe
+                                    navigateToSteps = true
+                                }
                                 
                                 requiredQuestionsFilled()
                             }) {

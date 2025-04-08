@@ -48,7 +48,7 @@ struct AddNewRecipeSteps: View {
                                 },
                             footer: Text("Be descriptive in your instructions as you may forget them later on!")) {
                         Picker("Number of Steps:", selection: $numOfSteps) {
-                            ForEach(1...20, id: \.self) { number in
+                            ForEach(1...max(20, numOfSteps), id: \.self) { number in
                                 Text("\(number)").tag(number)
                             }
                         }
@@ -119,6 +119,14 @@ struct AddNewRecipeSteps: View {
                 updateStepsArray()
             }
         }
+        .onAppear {
+            if !recipe.steps.isEmpty {
+                steps = recipe.steps
+                numOfSteps = recipe.steps.count
+            } else {
+                updateStepsArray()
+            }
+        }
     }
 
     private func insertTimer(for index: Int) {
@@ -145,10 +153,9 @@ struct AddNewRecipeSteps: View {
 
     private func saveSteps() {
         for step in steps {
-            if !recipe.steps.contains(where: { $0.id == step.id }) {
-                modelContext.insert(step)
-                recipe.steps.append(step)
-            }
+            let newStep = StepsViewModel(text: step.text)
+            modelContext.insert(newStep)
+            recipe.steps.append(newStep)
         }
 
         do {
