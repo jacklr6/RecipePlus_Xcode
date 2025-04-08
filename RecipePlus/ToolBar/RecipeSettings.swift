@@ -30,6 +30,7 @@ struct RecipeSettings: View {
     @AppStorage("isLightMode") private var isLightMode: Bool = true
     @State private var isEditing = false
     @AppStorage("imageCompressionQuality") private var imageCompressionQuality = 0.8
+    @AppStorage("TimeIntervalSave") var timeIntervalSave: String = "10"
 
     var body: some View {
         NavigationStack {
@@ -90,7 +91,7 @@ struct RecipeSettings: View {
                         }
                         
                         Section(header: Text("Image Compression \(Image(systemName: "photo.on.rectangle.angled.fill"))  |  \(String(format: "%.1f", imageCompressionQuality))"),
-                                footer: Text("This slider changes the quality of images when they are saved to your Recipe+ list.")) {
+                                footer: Text("Change the quality of images when they are saved to your Recipe+ list.")) {
                             Slider(value: $imageCompressionQuality, in: 0.0...1.0, step: 0.1) {
                             } minimumValueLabel: {
                                 Text("Low ")
@@ -101,7 +102,7 @@ struct RecipeSettings: View {
                             }
                         }
                         
-                        Section(header: Text("App Color \(Image(systemName: "paintbrush"))"), footer: Text("These pickers change the colors of certain icons in the app.")) {
+                        Section(header: Text("App Color \(Image(systemName: "paintbrush"))"), footer: Text("Changes the colors of certain icons in the app.")) {
                             HStack {
                                 Picker("Primary Color", selection: $primaryColor) {
                                     Text("Red").tag(1)
@@ -131,6 +132,14 @@ struct RecipeSettings: View {
                             }
                         }
                         
+                        Section(header: Text("Time Interval"), footer: Text("Change the amount of time before the arrow pops up in CookingUI. A value of 0 will result in the arrow never popping up.")) {
+                            HStack {
+                                Text("Time Interval:")
+                                Spacer()
+                                TextField("10", text: $timeIntervalSave)
+                            }
+                        }
+                        
                         Section(header: Text("Your Data")) {
                             Button(action: {
                                 deleteAllRecipes()
@@ -146,7 +155,7 @@ struct RecipeSettings: View {
                         }
                         
                         VStack {
-                            Text("Recipe + | iOS Build \(Text("2.0 Beta").fontWeight(.bold).foregroundStyle(LinearGradient(gradient: Gradient(colors: [colorFromTag(primaryColor), colorFromTag(secondaryColor)]), startPoint: .topLeading, endPoint: .bottomTrailing)))")
+                            Text("Recipe + | iOS Build \(Text("2.0.3 Beta").fontWeight(.bold).foregroundStyle(LinearGradient(gradient: Gradient(colors: [colorFromTag(primaryColor), colorFromTag(secondaryColor)]), startPoint: .topLeading, endPoint: .bottomTrailing)))")
                             Text("Jack Rogers | 2025")
                         }
                         .font(.footnote)

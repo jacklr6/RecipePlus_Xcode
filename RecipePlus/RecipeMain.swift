@@ -151,8 +151,8 @@ struct RecipeMain: View {
                                                         }
                                                         .buttonStyle(PlainButtonStyle())
                                                         .navigationDestination(isPresented: $isCooking) {
-                                                            if let recipeToCook = selectedRecipeEdit {
-                                                                CookingMain(steps: recipeToCook.steps.map { $0.text })
+                                                            if let recipeToCook = selectedRecipeCooking {
+                                                                CookingMain(recipe: recipeToCook)
                                                             }
                                                         }
                                                         Spacer()
