@@ -141,29 +141,24 @@ struct RecipeMain: View {
                                                     VStack {
                                                         Button(action: {
                                                             selectedRecipeCooking = recipe
-                                                            isCooking = true
                                                         }) {
                                                             Image(systemName: "fork.knife")
                                                         }
                                                         .buttonStyle(PlainButtonStyle())
-                                                        .navigationDestination(isPresented: $isCooking) {
-                                                            if let recipeToCook = selectedRecipeCooking {
-                                                                CookingMain(recipe: recipeToCook)
-                                                            }
+                                                        .sheet(item: $selectedRecipeCooking) { recipeToCook in
+                                                            CookingMain(recipe: recipeToCook)
                                                         }
+                                                        
                                                         Spacer()
 
                                                         Button(action: {
                                                             selectedRecipeEdit = recipe
-                                                            isEditing = true
                                                         }) {
                                                             Image(systemName: "pencil")
                                                         }
                                                         .buttonStyle(PlainButtonStyle())
-                                                        .navigationDestination(isPresented: $isEditing) {
-                                                            if let recipeToEdit = selectedRecipeEdit {
-                                                                EditRecipe(recipe: recipeToEdit)
-                                                            }
+                                                        .sheet(item: $selectedRecipeEdit) { recipeToEdit in
+                                                            EditRecipe(recipe: recipeToEdit)
                                                         }
                                                         Spacer()
 

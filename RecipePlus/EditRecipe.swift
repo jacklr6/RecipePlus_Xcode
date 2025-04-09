@@ -38,6 +38,17 @@ struct EditRecipe: View {
         NavigationStack {
             VStack {
                 List {
+                    HStack {
+                        Text("Edit Recipe")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .multilineTextAlignment(.leading)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .textSelection(.disabled)
+                    .listRowBackground(Color.clear)
+                    
                     Section("Basic Information") {
                         HStack {
                             Text("Name:")
@@ -257,8 +268,6 @@ struct EditRecipe: View {
                 }
             }
         }
-        .navigationTitle("Edit Recipe")
-        .navigationBarItems(trailing: Button("\(Image(systemName: "square.and.arrow.up"))") { showShareAlert = true })
         .onAppear {
             if let imageData = recipe.imageData {
                 selectedImage = UIImage(data: imageData)
