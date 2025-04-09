@@ -113,27 +113,26 @@ struct RecipeFavorites: View {
                                                 VStack {
                                                     Button(action: {
                                                         selectedRecipeCooking = recipe
-                                                        isCooking = true
                                                     }) {
                                                         Image(systemName: "fork.knife")
                                                     }
                                                     .buttonStyle(PlainButtonStyle())
-                                                    .navigationDestination(isPresented: $isCooking) {
-                                                        if let recipeToCook = selectedRecipeCooking {
+                                                    .sheet(item: $selectedRecipeCooking) { recipeToCook in
+                                                        NavigationStack {
                                                             CookingMain(recipe: recipeToCook)
                                                         }
                                                     }
+                                                    
                                                     Spacer()
 
                                                     Button(action: {
                                                         selectedRecipeEdit = recipe
-                                                        isEditing = true
                                                     }) {
                                                         Image(systemName: "pencil")
                                                     }
                                                     .buttonStyle(PlainButtonStyle())
-                                                    .navigationDestination(isPresented: $isEditing) {
-                                                        if let recipeToEdit = selectedRecipeEdit {
+                                                    .sheet(item: $selectedRecipeEdit) { recipeToEdit in
+                                                        NavigationStack {
                                                             EditRecipe(recipe: recipeToEdit)
                                                         }
                                                     }

@@ -14,6 +14,7 @@ struct EditRecipe: View {
     @Environment(\.dismiss) private var dismiss
     
     @Bindable var recipe: RecipesViewModel
+    @Query private var ingredients: [IngredViewModel]
     @Query private var sections: [SectionsViewModel]
     @Query private var steps: [StepsViewModel]
     
@@ -38,63 +39,63 @@ struct EditRecipe: View {
         NavigationStack {
             VStack {
                 List {
-                    HStack {
-                        Text("Edit Recipe")
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .multilineTextAlignment(.leading)
-                        Spacer()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .textSelection(.disabled)
-                    .listRowBackground(Color.clear)
-                    
                     Section("Basic Information") {
-                        HStack {
-                            Text("Name:")
-                            TextField("Recipe Name", text: $recipe.name)
-                        }
-                        
-                        Picker("Section:", selection: $selectedSection) {
-                            ForEach(sections, id: \.name) { section in
-                                Text(section.name).tag(section.name)
-                            }
-                        }
-                        .onAppear {
-                            selectedSection = recipe.sectionName
-                        }
-                        .onChange(of: selectedSection) { _, newValue in
-                            recipe.sectionName = newValue
-                        }
-                        
-                        if recipe.ingredients.isEmpty {
+                        if recipe.name.isEmpty {
                             VStack {
-                                Text("There was an error in loading your ingredients. Please add the recipe manually.")
+                                Text("There was an error in loading your recipe name. Please edit the recipe manually.")
                                 Text("Error Code: RPER001")
                                     .fontWeight(.bold)
                             }
                             .foregroundColor(.gray)
                             .multilineTextAlignment(.center)
-                            .frame(width: 350)
                         } else {
+                            HStack {
+                                Text("Name:")
+                                TextField("Recipe Name", text: $recipe.name)
+                            }
+                        }
+                        
+                        if recipe.sectionName.isEmpty {
+                            VStack {
+                                Text("There was an error in loading your section. Please edit the recipe manually.")
+                                Text("Error Code: RPER002")
+                                    .fontWeight(.bold)
+                            }
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                        } else {
+                            Picker("Section:", selection: $selectedSection) {
+                                ForEach(sections, id: \.name) { section in
+                                    Text(section.name).tag(section.name)
+                                }
+                            }
+                            .onAppear {
+                                if sections.contains(where: { $0.name == recipe.sectionName }) {
+                                    selectedSection = recipe.sectionName
+                                } else if let first = sections.first?.name {
+                                    selectedSection = first
+                                    recipe.sectionName = first
+                                } else {
+                                    selectedSection = ""
+                                }
+                            }
+                        }
+                        
+                        if let firstIngredient = recipe.ingredients.first {
                             HStack {
                                 Text("Total Time:")
                                 TextField("Enter Time", text: Binding(
-                                    get: { recipe.ingredients.first?.timeAmount ?? "" },
+                                    get: { firstIngredient.timeAmount },
                                     set: { newValue in
-                                        if !recipe.ingredients.isEmpty {
-                                            recipe.ingredients[0].timeAmount = newValue
-                                        }
+                                        firstIngredient.timeAmount = newValue
                                     }
                                 ))
                                 .keyboardType(.decimalPad)
-                                
+
                                 Picker("", selection: Binding(
-                                    get: { recipe.ingredients.first?.unitTime ?? "Minutes" },
+                                    get: { firstIngredient.unitTime },
                                     set: { newValue in
-                                        if !recipe.ingredients.isEmpty {
-                                            recipe.ingredients[0].unitTime = newValue
-                                        }
+                                        firstIngredient.unitTime = newValue
                                     }
                                 )) {
                                     ForEach(unitOptionsTime, id: \.self) { unitTime in
@@ -103,15 +104,13 @@ struct EditRecipe: View {
                                 }
                                 .pickerStyle(MenuPickerStyle())
                             }
-                            
+
                             HStack {
                                 Text("Difficulty:")
                                 Picker("Difficulty:", selection: Binding(
-                                    get: { recipe.ingredients.first?.difficulty ?? "Easy" },
+                                    get: { firstIngredient.difficulty },
                                     set: { newValue in
-                                        if !recipe.ingredients.isEmpty {
-                                            recipe.ingredients[0].difficulty = newValue
-                                        }
+                                        firstIngredient.difficulty = newValue
                                     }
                                 )) {
                                     ForEach(difficultyOptions, id: \.self) { difficulty in
@@ -120,6 +119,15 @@ struct EditRecipe: View {
                                 }
                                 .pickerStyle(SegmentedPickerStyle())
                             }
+                        } else {
+                            VStack {
+                                Text("There was an error in loading your ingredients. Please edit the recipe manually.")
+                                Text("Error Code: RPER003")
+                                    .fontWeight(.bold)
+                            }
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 350)
                         }
                     }
                     
@@ -256,12 +264,14 @@ struct EditRecipe: View {
                         .fontWeight(.semibold)
                     }
                 }
+                .navigationTitle("Edit Recipe")
+                .navigationBarItems(trailing: Button("\(Image(systemName: "square.and.arrow.up"))") { showShareAlert = true })
                 .alert("Privacy Information", isPresented: $showImageAlert) {
                     Button("OK", role: .cancel) { dismiss() }
                 } message: {
                     Text("All photos are stored on-device and never leave your iPhone. Not only your photos, but all of your Recipes+ data can be erased in settings.")
                 }
-                .alert("Share", isPresented: $showShareAlert) {
+                .alert("Share Sheet", isPresented: $showShareAlert) {
                     Button("OK", role: .cancel) { }
                 } message: {
                     Text("The ability to share this recipe with your friends is coming soon. (2.1)")

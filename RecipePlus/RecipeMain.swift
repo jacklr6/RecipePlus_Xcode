@@ -121,7 +121,11 @@ struct RecipeMain: View {
                                                         
                                                         HStack(spacing: 0) {
                                                             ForEach(recipe.ingredients, id: \.name) { ingredient in
-                                                                Text("\(ingredient.difficulty) • \(ingredient.timeAmount) \(ingredient.unitTime)")
+                                                                Text("\(ingredient.difficulty)")
+                                                            }
+                                                            Text(" • ")
+                                                            ForEach(recipe.ingredients, id: \.name) { ingredient in
+                                                                Text("\(ingredient.timeAmount) \(ingredient.unitTime)")
                                                             }
                                                         }
                                                         .font(.subheadline)
@@ -146,7 +150,9 @@ struct RecipeMain: View {
                                                         }
                                                         .buttonStyle(PlainButtonStyle())
                                                         .sheet(item: $selectedRecipeCooking) { recipeToCook in
-                                                            CookingMain(recipe: recipeToCook)
+                                                            NavigationStack {
+                                                                CookingMain(recipe: recipeToCook)
+                                                            }
                                                         }
                                                         
                                                         Spacer()
@@ -158,7 +164,9 @@ struct RecipeMain: View {
                                                         }
                                                         .buttonStyle(PlainButtonStyle())
                                                         .sheet(item: $selectedRecipeEdit) { recipeToEdit in
-                                                            EditRecipe(recipe: recipeToEdit)
+                                                            NavigationStack {
+                                                                EditRecipe(recipe: recipeToEdit)
+                                                            }
                                                         }
                                                         Spacer()
 
