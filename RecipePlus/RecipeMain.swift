@@ -34,7 +34,7 @@ struct RecipeMain: View {
     @State private var isCooking: Bool = false
     @State private var rotatingSymbol = 0
     @State private var timer: Timer? = nil
-    private let symbols = ["stove", "flame", "cooktop", "fork.knife"]
+    private let symbols = ["stove", "flame", "cooktop", "fork.knife", "frying.pan"]
     @AppStorage("primaryColor") private var primaryColor: Int = 4
     @AppStorage("secondaryColor") private var secondaryColor: Int = 5
     @AppStorage("recipeConfimedSaveVisibility") private var recipeConfimedSaveVisibility = 0.0

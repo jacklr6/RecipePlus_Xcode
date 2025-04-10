@@ -106,7 +106,7 @@ struct AddNewRecipeSteps: View {
                 .alert("Timers", isPresented: $showTimerAlert) {
                     Button("OK", role: .cancel) { dismiss() }
                 } message: {
-                    Text("To insert a timer, tap 'Insert Timer'. Input the timer information in the format '{TimerName:HH:MM}'.")
+                    Text("To insert a timer, tap 'Insert Timer'. Input the timer information in the format '{HH:MM}'.")
                 }
                 .alert("Required Questions", isPresented: $showRequiredQuestionsAlert) {
                     Button("OK", role: .cancel) { }
@@ -130,7 +130,7 @@ struct AddNewRecipeSteps: View {
     }
 
     private func insertTimer(for index: Int) {
-        steps[index].text += "{TimerName:00:00}"
+        steps[index].text += "{00:00}"
     }
 
     private func updateStepsArray() {

@@ -369,8 +369,84 @@ struct SectionsEditorView: View {
     }
 }
 
+struct CookingStepsPreference: View {
+    @Environment(\.dismiss) var dismiss
+    
+    @AppStorage("stepCounterPreference") private var stepCounterPreference = 0
+    @State private var stepCounter = 1
+    @State private var showGauge = true
+    @State private var showInfoText = false
+    var body: some View {
+        VStack {
+            HStack {
+                Image(systemName: "\(stepCounter).circle")
+                    .font(.system(size: 40))
+                    .foregroundColor(Color.blue)
+                    .contentTransition(.symbolEffect(.replace))
+                    .padding(.trailing, 7)
+                
+                Divider()
+                    .frame(height: 100)
+                
+                Gauge(value: Double(stepCounter), in: 0...50) {
+                } currentValueLabel: {
+                    Text("\(stepCounter)")
+                        .foregroundColor(.blue)
+                }
+                .gaugeStyle(.accessoryCircularCapacity)
+                .tint(.blue)
+                .scaleEffect(x: 0.72, y: 0.72)
+                .opacity(showGauge ? 1 : 0)
+                .animation(.easeInOut(duration: 0.3), value: showGauge)
+            }
+            .padding(.bottom, 15)
+            
+            Button(action: {
+                if stepCounter < 50 {
+                    showGauge = false
+                    stepCounter += 1
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        showGauge = true
+                    }
+                }
+            }) {
+                Text("Add One")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+            }
+            .buttonStyle(.borderedProminent)
+            .shadow(color: .blue, radius: 10, y: 0)
+            
+            Button(action: {
+                stepCounter = 1
+            }) {
+                Text("Reset")
+            }
+            .padding(.top, 5)
+            .opacity(stepCounter > 1 ? 1 : 0)
+            
+            Text("The animation won't be noticable moving between steps.")
+                .font(.callout)
+                .frame(width: 300)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
+                .opacity(showInfoText ? 1 : 0)
+        }
+        .onAppear {
+            showInfo()
+        }
+    }
+    
+    func showInfo() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            showInfoText = true
+        }
+    }
+}
+
 struct RecipeSettings_Previews: PreviewProvider {
     static var previews: some View {
-        RecipeSettings()
+//        RecipeSettings()
+        CookingStepsPreference()
     }
 }

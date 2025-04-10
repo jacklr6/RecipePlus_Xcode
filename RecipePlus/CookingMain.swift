@@ -18,7 +18,8 @@ struct CookingMain: View {
     var steps: [StepsViewModel] {
         recipe.steps
     }
-
+    
+    @State private var showGauge: Bool = false
     @State private var currentStepIndex = 0
     @State private var isPlaying = false
     @State private var timerProgress: Double = 0
@@ -81,15 +82,15 @@ struct CookingMain: View {
                                     }
                                 
                                 Text(recipe.name)
-                                    .font(.title)
+                                    .font(.system(size: 35))
                                     .fontWeight(.bold)
-                                    .offset(y: 130)
+                                    .offset(y: 125)
                             }
                         }
                     }
                     .offset(y: -300)
                     .ignoresSafeArea(.all)
-                        
+                    
                     ZStack {
                         TabView(selection: $currentStepIndex) {
                             ForEach(steps.indices, id: \.self) { index in
@@ -99,12 +100,34 @@ struct CookingMain: View {
                                         .frame(width: 300, height: 250)
                                         .animation(.easeInOut, value: currentStepIndex)
                                     
-                                    Text(steps[index].text)
+                                    Text(highlightTimers(in: steps[index].text))
                                         .font(.title3)
                                         .frame(width: 260, height: 230)
                                         .foregroundColor(index == currentStepIndex ? .blue : .primary)
                                         .cornerRadius(8)
                                         .multilineTextAlignment(.center)
+                                    
+//                                    Image(systemName: "\(index + 1).circle")
+//                                        .font(.title)
+//                                        .symbolEffect(.bounce, options: .nonRepeating)
+//                                        .foregroundColor(Color.blue)
+//                                        .offset(x: -125, y: -100)
+                                    
+                                    Gauge(value: Double(currentStepIndex), in: 0...Double(max(steps.count - 1, 1))) {
+                                    } currentValueLabel: {
+                                        Text("\(currentStepIndex + 1)")
+                                            .foregroundColor(.blue)
+                                    }
+                                    .gaugeStyle(.accessoryCircularCapacity)
+                                    .tint(.blue)
+                                    .opacity(showGauge ? 1 : 0)
+                                    .scaleEffect(x: 0.6, y: 0.6)
+                                    .offset(x: -120, y: -95)
+                                    .onAppear {
+                                        withAnimation(.easeIn(duration: 0.9)) {
+                                            showGauge = true
+                                        }
+                                    }
                                 }
                                 .tag(index)
                             }
@@ -182,13 +205,34 @@ struct CookingMain: View {
             default: return .gray
         }
     }
+    
+    func highlightTimers(in text: String) -> AttributedString {
+        var attributed = AttributedString(text)
+        let pattern = #"\{\d{2}:\d{2}\}"#
+
+        if let regex = try? NSRegularExpression(pattern: pattern) {
+            let nsrange = NSRange(text.startIndex..., in: text)
+            for match in regex.matches(in: text, range: nsrange) {
+                if let range = Range(match.range, in: text) {
+                    let swiftRange = attributed.range(of: String(text[range]))
+                    if let swiftRange = swiftRange {
+                        attributed[swiftRange].foregroundColor = .orange
+                        attributed[swiftRange].font = .title3
+                    }
+                }
+            }
+        }
+        return attributed
+    }
 }
 
 struct CookingMain_Previews: PreviewProvider {
     static var previews: some View {
         let mockSteps = [
             StepsViewModel(text: "The first step is to add the flour and eggs to a large mixing bowl. Mix until combined"),
-            StepsViewModel(text: "Put the mixture onto a baking sheet and put it into the oven, 375 for 20 minutes.")
+            StepsViewModel(text: "Put the mixture onto a baking sheet and put it into the oven, 375 for {00:12}."),
+            StepsViewModel(text: "Put the mixture onto a baking sheet and put it into the oven, 375 for {01:45}."),
+            StepsViewModel(text: "Put the mixture onto a baking sheet and put it into the oven, 375 for {26:20}.")
         ]
         let mockRecipe = RecipesViewModel(name: "Test Recipe", sectionName: "Appetizer", steps: mockSteps)
         CookingMain(recipe: mockRecipe)

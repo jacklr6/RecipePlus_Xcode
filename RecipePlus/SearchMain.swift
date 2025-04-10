@@ -122,7 +122,6 @@ struct RecipeSearch: View {
                                                             CookingMain(recipe: recipeToCook)
                                                         }
                                                     }
-                                                    
                                                     Spacer()
 
                                                     Button(action: {
