@@ -135,6 +135,8 @@ struct RecipeSettings: View {
                             }
                         }
                         
+                        Section(header: Text("Step Counter"), footer: Text("gives you a step count while you cook")) {}
+                        
                         Section(header: Text("Time Interval"), footer: Text("Change the amount of time before the arrow pops up in CookingUI. A value of 0 will result in the arrow never popping up.")) {
                             HStack {
                                 Text("Time Interval:")
@@ -379,25 +381,44 @@ struct CookingStepsPreference: View {
     var body: some View {
         VStack {
             HStack {
-                Image(systemName: "\(stepCounter).circle")
-                    .font(.system(size: 40))
-                    .foregroundColor(Color.blue)
-                    .contentTransition(.symbolEffect(.replace))
-                    .padding(.trailing, 7)
+                VStack {
+                    Image(systemName: stepCounterPreference == 1 ? "checkmark" : "xmark")
+                        .font(.system(size: 20, weight: .semibold))
+                        .contentTransition(.symbolEffect(.replace))
+                        .offset(y: -9)
+                    
+                    Image(systemName: "\(stepCounter).circle")
+                        .font(.system(size: 40))
+                        .foregroundColor(Color.blue)
+                        .contentTransition(.symbolEffect(.replace))
+                        .onTapGesture {
+                            stepCounterPreference = 1
+                        }
+                }
+                .padding(.trailing, 7)
                 
                 Divider()
                     .frame(height: 100)
                 
-                Gauge(value: Double(stepCounter), in: 0...50) {
-                } currentValueLabel: {
-                    Text("\(stepCounter)")
-                        .foregroundColor(.blue)
+                VStack {
+                    Image(systemName: stepCounterPreference == 1 ? "xmark" : "checkmark")
+                        .font(.system(size: 20, weight: .semibold))
+                        .contentTransition(.symbolEffect(.replace))
+                    
+                    Gauge(value: Double(stepCounter), in: 0...50) {
+                    } currentValueLabel: {
+                        Text("\(stepCounter)")
+                            .foregroundColor(.blue)
+                    }
+                    .gaugeStyle(.accessoryCircularCapacity)
+                    .tint(.blue)
+                    .scaleEffect(x: 0.72, y: 0.72)
+                    .opacity(showGauge ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.3), value: showGauge)
+                    .onTapGesture {
+                        stepCounterPreference = 0
+                    }
                 }
-                .gaugeStyle(.accessoryCircularCapacity)
-                .tint(.blue)
-                .scaleEffect(x: 0.72, y: 0.72)
-                .opacity(showGauge ? 1 : 0)
-                .animation(.easeInOut(duration: 0.3), value: showGauge)
             }
             .padding(.bottom, 15)
             
@@ -424,13 +445,16 @@ struct CookingStepsPreference: View {
             }
             .padding(.top, 5)
             .opacity(stepCounter > 1 ? 1 : 0)
+            .animation(.easeInOut(duration: 0.3), value: stepCounter)
             
-            Text("The animation won't be noticable moving between steps.")
+            Text("The animation won't be noticable if you're moving between steps.")
                 .font(.callout)
                 .frame(width: 300)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
                 .opacity(showInfoText ? 1 : 0)
+                .padding(.top, 5)
+                .animation(.easeInOut(duration: 0.3), value: showInfoText)
         }
         .onAppear {
             showInfo()
@@ -446,7 +470,7 @@ struct CookingStepsPreference: View {
 
 struct RecipeSettings_Previews: PreviewProvider {
     static var previews: some View {
-//        RecipeSettings()
-        CookingStepsPreference()
+        RecipeSettings()
+//        CookingStepsPreference()
     }
 }
