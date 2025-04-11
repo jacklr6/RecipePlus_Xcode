@@ -15,6 +15,7 @@ struct RecipeSettings: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @State private var settingsEditorIsPresented: Bool = false
+    @State private var settingsStepCounterIsPresented: Bool = false
     @State private var deleteConfirmation: Bool = false
     @State private var isDeleting: Bool = false
     @State private var dataIsDeleted: Bool = false
@@ -32,6 +33,7 @@ struct RecipeSettings: View {
     @State private var isEditing = false
     @AppStorage("imageCompressionQuality") private var imageCompressionQuality = 0.8
     @AppStorage("TimeIntervalSave") var timeIntervalSave: String = "10"
+    @AppStorage("stepCounterPreference") private var stepCounterPreference = 0
 
     var body: some View {
         NavigationStack {
@@ -135,7 +137,21 @@ struct RecipeSettings: View {
                             }
                         }
                         
-                        Section(header: Text("Step Counter"), footer: Text("gives you a step count while you cook")) {}
+                        Section(header: Text("Step Counter"), footer: Text("Gives you an option for which steps counter you prefer to use in CookingUI.")) {
+                            HStack {
+                                Button(action: {
+                                    settingsStepCounterIsPresented.toggle()
+                                }) {
+                                    Text("Show Step Counters")
+                                }
+                                .sheet(isPresented: $settingsStepCounterIsPresented) {
+                                    CookingStepsPreference()
+                                }
+                                Spacer()
+                                Image(systemName: stepCounterPreference == 0 ? "circle.grid.2x1.left.filled" : "circle.grid.2x1.right.filled")
+                                    .foregroundColor(Color.blue)
+                            }
+                        }
                         
                         Section(header: Text("Time Interval"), footer: Text("Change the amount of time before the arrow pops up in CookingUI. A value of 0 will result in the arrow never popping up.")) {
                             HStack {
@@ -314,13 +330,13 @@ struct SectionsEditorView: View {
                 loadSections()
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button("Close") {
                         saveSections()
                         dismiss()
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     EditButton()
                 }
                 ToolbarItem(placement: .bottomBar) {
@@ -379,85 +395,98 @@ struct CookingStepsPreference: View {
     @State private var showGauge = true
     @State private var showInfoText = false
     var body: some View {
-        VStack {
-            HStack {
-                VStack {
-                    Image(systemName: stepCounterPreference == 1 ? "checkmark" : "xmark")
-                        .font(.system(size: 20, weight: .semibold))
-                        .contentTransition(.symbolEffect(.replace))
-                        .offset(y: -9)
+        NavigationStack {
+            VStack {
+                HStack {
+                    VStack {
+                        Image(systemName: stepCounterPreference == 1 ? "checkmark" : "xmark")
+                            .font(.system(size: stepCounterPreference == 1 ? 25 : 20, weight: .semibold))
+                            .foregroundColor(stepCounterPreference == 1 ? Color.green : Color.black)
+                            .contentTransition(.symbolEffect(.replace))
+                            .offset(y: -9)
+                        
+                        Image(systemName: "\(stepCounter).circle")
+                            .font(.system(size: 40))
+                            .foregroundColor(Color.blue)
+                            .contentTransition(.symbolEffect(.replace))
+                            .onTapGesture {
+                                stepCounterPreference = 1
+                            }
+                    }
+                    .padding(.trailing, 7)
                     
-                    Image(systemName: "\(stepCounter).circle")
-                        .font(.system(size: 40))
-                        .foregroundColor(Color.blue)
-                        .contentTransition(.symbolEffect(.replace))
-                        .onTapGesture {
-                            stepCounterPreference = 1
+                    Divider()
+                        .frame(height: 130)
+                    
+                    VStack {
+                        Image(systemName: stepCounterPreference == 1 ? "xmark" : "checkmark")
+                            .font(.system(size: stepCounterPreference == 0 ? 25 : 20, weight: .semibold))
+                            .foregroundColor(stepCounterPreference == 0 ? Color.green : Color.black)
+                            .contentTransition(.symbolEffect(.replace))
+                        
+                        Gauge(value: Double(stepCounter), in: 0...50) {
+                        } currentValueLabel: {
+                            Text("\(stepCounter)")
+                                .foregroundColor(.blue)
                         }
+                        .gaugeStyle(.accessoryCircularCapacity)
+                        .tint(.blue)
+                        .scaleEffect(x: 0.72, y: 0.72)
+                        .opacity(showGauge ? 1 : 0)
+                        .animation(.easeInOut(duration: 0.3), value: showGauge)
+                        .onTapGesture {
+                            stepCounterPreference = 0
+                        }
+                    }
                 }
-                .padding(.trailing, 7)
+                .padding(.bottom, 15)
                 
-                Divider()
-                    .frame(height: 100)
+                Button(action: {
+                    if stepCounter < 50 {
+                        showGauge = false
+                        stepCounter += 1
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            showGauge = true
+                        }
+                    }
+                }) {
+                    Text("Add One")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                }
+                .buttonStyle(.borderedProminent)
+                .shadow(color: .blue, radius: 10, y: 0)
                 
-                VStack {
-                    Image(systemName: stepCounterPreference == 1 ? "xmark" : "checkmark")
-                        .font(.system(size: 20, weight: .semibold))
-                        .contentTransition(.symbolEffect(.replace))
-                    
-                    Gauge(value: Double(stepCounter), in: 0...50) {
-                    } currentValueLabel: {
-                        Text("\(stepCounter)")
-                            .foregroundColor(.blue)
-                    }
-                    .gaugeStyle(.accessoryCircularCapacity)
-                    .tint(.blue)
-                    .scaleEffect(x: 0.72, y: 0.72)
-                    .opacity(showGauge ? 1 : 0)
-                    .animation(.easeInOut(duration: 0.3), value: showGauge)
-                    .onTapGesture {
-                        stepCounterPreference = 0
-                    }
+                Button(action: {
+                    stepCounter = 1
+                }) {
+                    Text("Reset")
                 }
-            }
-            .padding(.bottom, 15)
-            
-            Button(action: {
-                if stepCounter < 50 {
-                    showGauge = false
-                    stepCounter += 1
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        showGauge = true
-                    }
-                }
-            }) {
-                Text("Add One")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-            }
-            .buttonStyle(.borderedProminent)
-            .shadow(color: .blue, radius: 10, y: 0)
-            
-            Button(action: {
-                stepCounter = 1
-            }) {
-                Text("Reset")
-            }
-            .padding(.top, 5)
-            .opacity(stepCounter > 1 ? 1 : 0)
-            .animation(.easeInOut(duration: 0.3), value: stepCounter)
-            
-            Text("The animation won't be noticable if you're moving between steps.")
-                .font(.callout)
-                .frame(width: 300)
-                .multilineTextAlignment(.center)
-                .foregroundColor(.secondary)
-                .opacity(showInfoText ? 1 : 0)
                 .padding(.top, 5)
-                .animation(.easeInOut(duration: 0.3), value: showInfoText)
-        }
-        .onAppear {
-            showInfo()
+                .opacity(stepCounter > 1 ? 1 : 0)
+                .animation(.easeInOut(duration: 0.3), value: stepCounter)
+                
+                Text("The animation won't be noticable if you're moving between steps.")
+                    .font(.callout)
+                    .frame(width: 300)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.secondary)
+                    .opacity(showInfoText ? 1 : 0)
+                    .padding(.top, 5)
+                    .animation(.easeInOut(duration: 0.3), value: showInfoText)
+            }
+            .onAppear {
+                showInfo()
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Text("Close")
+                    }
+                }
+            }
         }
     }
     
@@ -470,7 +499,7 @@ struct CookingStepsPreference: View {
 
 struct RecipeSettings_Previews: PreviewProvider {
     static var previews: some View {
-        RecipeSettings()
-//        CookingStepsPreference()
+//        RecipeSettings()
+        CookingStepsPreference()
     }
 }

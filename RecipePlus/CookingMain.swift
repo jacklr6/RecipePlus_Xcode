@@ -32,6 +32,7 @@ struct CookingMain: View {
     @AppStorage("secondaryColor") private var secondaryColor: Int = 5
     @AppStorage("TimeIntervalSave") var timeIntervalSave: TimeInterval = 10
     @AppStorage("isLightMode") private var isLightMode: Bool = true
+    @AppStorage("stepCounterPreference") private var stepCounterPreference = 0
 
     var body: some View {
         VStack {
@@ -107,25 +108,27 @@ struct CookingMain: View {
                                         .cornerRadius(8)
                                         .multilineTextAlignment(.center)
                                     
-//                                    Image(systemName: "\(index + 1).circle")
-//                                        .font(.title)
-//                                        .symbolEffect(.bounce, options: .nonRepeating)
-//                                        .foregroundColor(Color.blue)
-//                                        .offset(x: -125, y: -100)
-                                    
-                                    Gauge(value: Double(currentStepIndex), in: 0...Double(max(steps.count - 1, 1))) {
-                                    } currentValueLabel: {
-                                        Text("\(currentStepIndex + 1)")
-                                            .foregroundColor(.blue)
-                                    }
-                                    .gaugeStyle(.accessoryCircularCapacity)
-                                    .tint(.blue)
-                                    .opacity(showGauge ? 1 : 0)
-                                    .scaleEffect(x: 0.6, y: 0.6)
-                                    .offset(x: -120, y: -95)
-                                    .onAppear {
-                                        withAnimation(.easeIn(duration: 0.9)) {
-                                            showGauge = true
+                                    if stepCounterPreference == 1 {
+                                        Image(systemName: "\(index + 1).circle")
+                                            .font(.title)
+                                            .symbolEffect(.bounce, options: .nonRepeating)
+                                            .foregroundColor(Color.blue)
+                                            .offset(x: -125, y: -100)
+                                    } else {
+                                        Gauge(value: Double(currentStepIndex), in: 0...Double(max(steps.count - 1, 1))) {
+                                        } currentValueLabel: {
+                                            Text("\(currentStepIndex + 1)")
+                                                .foregroundColor(.blue)
+                                        }
+                                        .gaugeStyle(.accessoryCircularCapacity)
+                                        .tint(.blue)
+                                        .opacity(showGauge ? 1 : 0)
+                                        .scaleEffect(x: 0.6, y: 0.6)
+                                        .offset(x: -120, y: -95)
+                                        .onAppear {
+                                            withAnimation(.easeIn(duration: 0.9)) {
+                                                showGauge = true
+                                            }
                                         }
                                     }
                                 }
